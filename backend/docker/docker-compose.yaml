@@ -28,6 +28,22 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+  
+  rate_service:
+    build:
+      context: ../
+      dockerfile: docker/rate_service.Dockerfile
+    container_name: rate_service
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_started
+    volumes:
+      - ../services/rate_service/app:/app/app
+    restart: unless-stopped
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
