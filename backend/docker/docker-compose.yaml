@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: db.Dockerfile
+    container_name: mindspark-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  auth_service:
+    build:
+      context: ../
+      dockerfile: docker/auth_service.Dockerfile
+    container_name: auth_service
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_started
+    volumes:
+      - ../services/auth_service/app:/app/app
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge
