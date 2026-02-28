@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  react:
+    build:
+      context: ../
+      dockerfile: docker/react.Dockerfile
+    container_name: mindspark-react
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../react.mind-spark.ru/src:/app/src
+    restart: unless-stopped
+    networks:
+      - app-network
+  
+networks:
+  app-network:
+    driver: bridge
