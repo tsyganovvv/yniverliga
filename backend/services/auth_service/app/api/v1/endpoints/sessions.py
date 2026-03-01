@@ -23,7 +23,7 @@ async def login(
     try:
         token = await service.login(user_data.username, user_data.password)
         response = JSONResponse(
-            content={"message": "login success"},
+            content={"message": "login success", "token": token},
             status_code=status.HTTP_200_OK,
         )
         response.headers["Auth-Token"] = token

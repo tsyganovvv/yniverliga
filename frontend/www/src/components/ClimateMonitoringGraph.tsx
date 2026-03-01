@@ -1,6 +1,23 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 import ForceGraph2D, { ForceGraphMethods } from 'react-force-graph-2d';
 
+export interface ClimateGraphNode {
+  id: string;
+}
+
+export interface ClimateGraphLink {
+  source: string;
+  target: string;
+  score: number;
+  categories: string;
+  desc: string;
+}
+
+export interface ClimateGraphData {
+  nodes: ClimateGraphNode[];
+  links: ClimateGraphLink[];
+}
+
 const gData = {
   nodes: [
     { id: "Иван Иванов" }, { id: "Анна Смирнова" }, { id: "Сергей Петров" },
@@ -45,10 +62,15 @@ const gData = {
   ]
 };
 
-export default function ClimateMonitoringGraph() {
+interface ClimateMonitoringGraphProps {
+  graphData?: ClimateGraphData;
+}
+
+export default function ClimateMonitoringGraph({ graphData }: ClimateMonitoringGraphProps) {
   const fgRef = useRef<ForceGraphMethods>();
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const graph = graphData ?? gData;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -116,7 +138,7 @@ export default function ClimateMonitoringGraph() {
 
 <ForceGraph2D
   ref={fgRef}
-  graphData={gData}
+  graphData={graph}
   backgroundColor="#ffffff"
   nodeId="id"
   nodeVal={15} 

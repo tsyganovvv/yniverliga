@@ -118,8 +118,8 @@ class RewiewService:
             zf.writestr("xl/worksheets/sheet1.xml", sheet_xml)
         return buff.getvalue()
 
-    async def _collect_report_rows(self) -> list[dict]:
-        raw_rows = await self.repository.get_report_rows()
+    async def _collect_report_rows(self, department_id: UUID | None = None) -> list[dict]:
+        raw_rows = await self.repository.get_report_rows(department_id=department_id)
         rows = []
         for item in raw_rows:
             rows.append(
@@ -166,6 +166,9 @@ class RewiewService:
         try:
             result = await self.repository.create(rewiew_data)
         except IntegrityError as e:
+            error_text = str(e).lower()
+            if "rewiews_topic_fkey" in error_text or "topic" in error_text:
+                raise ValueError("undefined topic") from e
             raise ValueError("undefined user id") from e
         except Exception as e:
             raise self._as_value_error(e)
@@ -174,6 +177,12 @@ class RewiewService:
     async def get_all_rewiews(self) -> list[Rewiew]:
         try:
             return await self.repository.get_all()
+        except Exception as e:
+            raise self._as_value_error(e)
+
+    async def get_rewiews_by_department(self, department_id: UUID) -> list[dict]:
+        try:
+            return await self.repository.get_report_rows(department_id=department_id)
         except Exception as e:
             raise self._as_value_error(e)
 

@@ -71,11 +71,11 @@ class RewiewRepository:
         await self.db.refresh(db_rewiew)
         return db_rewiew
 
-    async def get_report_rows(self) -> list[dict]:
+    async def get_report_rows(self, department_id: UUID | None = None) -> list[dict]:
         from_user = aliased(User)
         to_user = aliased(User)
 
-        result = await self.db.execute(
+        query = (
             select(
                 Rewiew,
                 from_user.username,
@@ -85,8 +85,11 @@ class RewiewRepository:
             )
             .outerjoin(from_user, Rewiew.from_user_id == from_user.id)
             .outerjoin(to_user, Rewiew.to_user_id == to_user.id)
-            .order_by(Rewiew.created_at.desc()),
         )
+        if department_id is not None:
+            query = query.where(to_user.department_id == department_id)
+
+        result = await self.db.execute(query.order_by(Rewiew.created_at.desc()))
 
         rows = []
         for rewiew, from_username, from_fullname, to_username, to_fullname in result.all():

@@ -2,10 +2,11 @@ import { useState, useMemo, useRef, useEffect, useLayoutEffect, RefObject } from
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, ArrowUpDown, Tag, X, ChevronDown, Check, Filter, SortAsc, SortDesc } from 'lucide-react';
+import { Search, ArrowUpDown, Tag, X, ChevronDown, Check, Filter, SortAsc, SortDesc, Download } from 'lucide-react';
+import { utils, writeFile } from 'xlsx';
 
-interface Review {
-  id: number;
+export interface ReviewTableRow {
+  id: number | string;
   author: string;
   recipient: string;
   score: number;
@@ -14,7 +15,7 @@ interface Review {
   date: string;
 }
 
-const reviewsData: Review[] = [
+const reviewsData: ReviewTableRow[] = [
   { id: 1, author: "Иван Иванов", recipient: "Анна Смирнова", score: 5, category: "Надежность", comment: "Всегда сдает задачи в срок, очень приятно работать вместе.", date: "2026-02-28" },
   { id: 2, author: "Анна Смирнова", recipient: "Сергей Петров", score: 3, category: "Коммуникация", comment: "Рабочие вопросы решаются, но иногда долго отвечает в мессенджерах.", date: "2026-02-27" },
   { id: 3, author: "Сергей Петров", recipient: "Иван Иванов", score: 1, category: "Сроки", comment: "Сорвал дедлайн по важному проекту, не предупредив заранее.", date: "2026-02-25" },
@@ -60,7 +61,7 @@ const HighlightedText = ({
 
 interface FilterDropdownProps {
   title: string;
-  columnKey: keyof Review;
+  columnKey: keyof ReviewTableRow;
   options: (string | number)[];
   selectedValues: (string | number)[];
   onFilterChange: (values: (string | number)[]) => void;
@@ -263,10 +264,15 @@ const FilterDropdown = ({
   );
 };
 
-export default function ReviewsTable() {
+interface ReviewsTableProps {
+  reviews?: ReviewTableRow[];
+}
+
+export default function ReviewsTable({ reviews }: ReviewsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const sourceReviews = reviews ?? reviewsData;
   
   const [columnFilters, setColumnFilters] = useState<Record<string, (string | number)[]>>({
     author: [],
@@ -278,16 +284,16 @@ export default function ReviewsTable() {
 
   const uniqueValues = useMemo(() => {
     return {
-      author: Array.from(new Set(reviewsData.map(r => r.author))).sort(),
-      recipient: Array.from(new Set(reviewsData.map(r => r.recipient))).sort(),
-      score: Array.from(new Set(reviewsData.map(r => r.score))).sort((a, b) => b - a),
-      category: Array.from(new Set(reviewsData.map(r => r.category))).sort(),
-      date: Array.from(new Set(reviewsData.map(r => r.date))).sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+      author: Array.from(new Set(sourceReviews.map(r => r.author))).sort(),
+      recipient: Array.from(new Set(sourceReviews.map(r => r.recipient))).sort(),
+      score: Array.from(new Set(sourceReviews.map(r => r.score))).sort((a, b) => b - a),
+      category: Array.from(new Set(sourceReviews.map(r => r.category))).sort(),
+      date: Array.from(new Set(sourceReviews.map(r => r.date))).sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
     };
-  }, []);
+  }, [sourceReviews]);
 
   const sortedAndFilteredReviews = useMemo(() => {
-    let result = reviewsData.filter(review => {
+    let result = sourceReviews.filter(review => {
       // Global search
       const searchWords = searchTerm.toLowerCase().split(/\s+/).filter(word => word.length > 0);
       const matchesSearch = searchWords.every(word => 
@@ -324,7 +330,7 @@ export default function ReviewsTable() {
     });
 
     return result;
-  }, [searchTerm, columnFilters, sortKey, sortOrder]);
+  }, [searchTerm, columnFilters, sortKey, sortOrder, sourceReviews]);
 
   const handleFilterChange = (key: string, values: (string | number)[]) => {
     setColumnFilters(prev => ({ ...prev, [key]: values }));
@@ -350,6 +356,43 @@ export default function ReviewsTable() {
 
   const hasActiveFilters = searchTerm !== "" || Object.values(columnFilters).some(v => Array.isArray(v) && v.length > 0);
 
+  const handleExportExcel = () => {
+    const rows = sortedAndFilteredReviews.map((review) => ({
+      'Отправитель': review.author,
+      'Получатель': review.recipient,
+      'Оценка': review.score,
+      'Категория': review.category,
+      'Комментарий': review.comment,
+      'Дата': new Date(review.date).toLocaleDateString('ru-RU'),
+    }));
+
+    const worksheet = utils.json_to_sheet(rows);
+    worksheet['!cols'] = [
+      { wch: 26 },
+      { wch: 26 },
+      { wch: 10 },
+      { wch: 22 },
+      { wch: 70 },
+      { wch: 14 },
+    ];
+
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Отзывы');
+
+    const now = new Date();
+    const stamp = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0'),
+      '_',
+      String(now.getHours()).padStart(2, '0'),
+      String(now.getMinutes()).padStart(2, '0'),
+      String(now.getSeconds()).padStart(2, '0'),
+    ].join('');
+
+    writeFile(workbook, `reviews_table_${stamp}.xlsx`);
+  };
+
   return (
     <div className="bg-white rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
       <div className="p-8 border-b border-gray-50">
@@ -368,6 +411,14 @@ export default function ReviewsTable() {
           </div>
           
           <div className="flex flex-wrap items-center gap-4">
+            <button
+              onClick={handleExportExcel}
+              disabled={sortedAndFilteredReviews.length === 0}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#F27D26] text-white rounded-2xl text-sm font-bold hover:bg-[#d96a1d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-4 h-4" />
+              Экспорт в Excel
+            </button>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input 

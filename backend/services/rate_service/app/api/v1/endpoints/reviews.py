@@ -112,6 +112,20 @@ async def get_rewiews_rate(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e),
         )
 
+@router.get(
+    "/department/{department_id}", status_code=status.HTTP_200_OK,
+)
+async def get_rewiews_by_department(
+    department_id: UUID,
+    service: Annotated[RewiewService, Depends(get_rewiew_service)],
+):
+    try:
+        return await service.get_rewiews_by_department(department_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e),
+        )
+
 
 @router.get(
     "/report/csv", status_code=status.HTTP_200_OK,
