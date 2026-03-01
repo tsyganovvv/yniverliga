@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from app.api import router
 from app.db.session import Base, engine
 from app.domain.models.users_models import User
+from app.domain.models.department_models import Department
 
 @asynccontextmanager
 async def lifespan(app=FastAPI):
