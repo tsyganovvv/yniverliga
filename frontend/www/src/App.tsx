@@ -6,17 +6,20 @@ import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import EmployeeDetailPage from "./pages/EmployeeDetailPage/EmployeeDetailPage";
 import NotificationsPage from "./pages/NotificationsPage/NotificationsPage";
+import RequireSession from "./components/auth/RequireSession";
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<WelcomePage />} />
-      <Route element={<AppLayout />}>
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/team" element={<EmployeePage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/employee/:employeeId" element={<EmployeeDetailPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
+      <Route element={<RequireSession />}>
+        <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/team" element={<EmployeePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/employee/:employeeId" element={<EmployeeDetailPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+        </Route>
       </Route>
     </Routes>
   );

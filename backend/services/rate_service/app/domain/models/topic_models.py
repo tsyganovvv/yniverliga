@@ -7,7 +7,7 @@ class Topic(BaseModel):
     __tablename__ = "topics"
     
 
-    name = Column(String(255), nullable=False, unique=False)
+    name = Column(String(255), nullable=False, unique=True)
     categories = Column(JSONB, nullable=False, default=list)
     is_positive = Column(Boolean, nullable=False, default=True)
     is_active = Column(Boolean, nullable=False, default=True)

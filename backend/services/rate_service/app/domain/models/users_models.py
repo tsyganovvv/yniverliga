@@ -27,8 +27,8 @@ class User(BaseModel):
 
     department_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("departments.id", ondelete="SET NULL"),
-        nullable=True,
+        ForeignKey("departments.id", ondelete="RESTRICT"),
+        nullable=False,
     )
 
     gender = Column(

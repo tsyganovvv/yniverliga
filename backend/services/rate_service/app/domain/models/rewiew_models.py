@@ -8,15 +8,19 @@ class Rewiew(BaseModel):
 
     to_user_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("users.id", ondelete="SET NULL"),
-        nullable=True,
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=False,
     )
     from_user_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("users.id", ondelete="SET NULL", name="fk_reviews_users"),
-        nullable=True,
+        ForeignKey("users.id", ondelete="RESTRICT", name="fk_reviews_users"),
+        nullable=False,
     )
-    topic = Column(String(255), nullable=False)
+    topic = Column(
+        String(255),
+        ForeignKey("topics.name", ondelete="RESTRICT"),
+        nullable=False,
+    )
     category = Column(String(255), nullable=False)
     context = Column(Text, nullable=False, default="", server_default="")
     is_positive = Column(Boolean, nullable=False, default=True)
