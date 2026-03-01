@@ -73,14 +73,26 @@ def upgrade() -> None:
         sa.Column("fullname", sa.String(length=255), nullable=False),
         sa.Column(
             "role",
-            user_role_enum,
+            postgresql.ENUM(
+                "EMPLOYEE",
+                "ADMIN",
+                "ROOT",
+                name="user_role",
+                create_type=False,
+            ),
             nullable=False,
             server_default=sa.text("'EMPLOYEE'"),
         ),
         sa.Column("department_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column(
             "gender",
-            gender_type_enum,
+            postgresql.ENUM(
+                "NOT_SPECIFIED",
+                "MALE",
+                "FEMALE",
+                name="gender_type",
+                create_type=False,
+            ),
             nullable=False,
             server_default=sa.text("'NOT_SPECIFIED'"),
         ),

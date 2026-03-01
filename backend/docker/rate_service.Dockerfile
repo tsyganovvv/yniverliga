@@ -8,4 +8,4 @@ RUN pip install poetry && \
     poetry config virtualenvs.create false && \
     poetry install --no-interaction
 
-CMD ["python", "app/main.py"]
+CMD ["sh", "-c", "alembic upgrade head && python app/main.py"]

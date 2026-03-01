@@ -10,7 +10,14 @@
 
 ```bash
 docker compose -f backend/docker/docker-compose.yaml up -d postgres auth_service rate_service
+```
 
+`alembic upgrade head` выполняется автоматически при старте `auth_service` и `rate_service`.
+Ручной запуск миграций обычно не нужен.
+
+Если хотите прогнать миграции отдельно вручную:
+
+```bash
 docker compose -f backend/docker/docker-compose.yaml run --rm auth_service alembic upgrade head
 docker compose -f backend/docker/docker-compose.yaml run --rm rate_service alembic upgrade head
 ```
