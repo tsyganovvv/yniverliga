@@ -1,0 +1,127 @@
+@font-face {
+    font-family: "WixMadeforDisplay";
+    src: url("../../assets/fonts/WixMadeforDisplay-Regular.ttf") format("truetype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "WixMadeforDisplay";
+    src: url("../../assets/fonts/WixMadeforDisplay-Bold.ttf") format("truetype");
+    font-weight: 700;
+}
+
+.wrapper {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.container {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    overflow: hidden;
+    font-family: "WixMadeforDisplay", sans-serif;
+}
+
+.whiteWrapper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: #fff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 1;
+}
+
+.sideSingle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.blackPanel {
+    position: absolute;
+    top: 0;
+    left: 0;          
+    width: 50%;
+    height: 100%;
+    background: black;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.panelContent {
+    text-align: center;
+    color: white;
+    padding: 40px;
+}
+
+.panelTitle {
+    font-size: clamp(28px, 4vw, 48px);
+    margin-bottom: 40px;
+
+    font-weight: 700; /* Bold */
+}
+
+.title {
+    font-size: clamp(28px, 4vw, 48px);
+    margin-bottom: 40px;
+}
+
+.form {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: clamp(260px, 30vw, 400px);
+}
+
+.formWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.input {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    font-family: "WixMadeforDisplay", sans-serif;
+}
+
+.gradientBtn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(90deg, #ffb400, #ff1e00);
+    color: white;
+    font-size: 16px;
+    font-family: "WixMadeforDisplay", sans-serif;
+}
+
+.outlineBtn {
+    padding: 16px;
+    border-radius: 16px;
+    border: 2px solid white;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    width: clamp(260px, 30vw, 400px); 
+    font-family: "WixMadeforDisplay", sans-serif;
+}
