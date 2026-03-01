@@ -9,7 +9,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ../react.mind-spark.ru/src:/app/src
+      - ../www/src:/app/src
     restart: unless-stopped
     networks:
       - app-network
