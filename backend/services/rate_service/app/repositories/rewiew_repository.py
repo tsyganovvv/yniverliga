@@ -29,6 +29,12 @@ class RewiewRepository:
             select(Rewiew).where(Rewiew.is_positive == is_positive),
         )
         return result.scalars().all()
+
+    async def get_by_rate(self, rate: int) -> list[Rewiew]:
+        result = await self.db.execute(
+            select(Rewiew).where(Rewiew.rate == rate),
+        )
+        return result.scalars().all()
     
     async def get_by_from_user_id(self, user_id: UUID) -> list[Rewiew]:
         result = await self.db.execute(
@@ -53,7 +59,7 @@ class RewiewRepository:
             to_user_id=rewiew_data.to_user_id,
             from_user_id=rewiew_data.from_user_id,
             is_positive=rewiew_data.is_positive,
-            score=rewiew_data.score,
+            rate=rewiew_data.rate,
         )
         self.db.add(db_rewiew)
         await self.db.commit()

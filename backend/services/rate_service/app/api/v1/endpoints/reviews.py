@@ -34,7 +34,7 @@ async def get_all_rewiews(
     service: Annotated[RewiewService, Depends(get_rewiew_service)],
 ):
     try:
-        return await service.repository.get_all()
+        return await service.get_all_rewiews()
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e),
@@ -48,7 +48,7 @@ async def get_rewiews_from_by_user_id(
     service: Annotated[RewiewService, Depends(get_rewiew_service)],
 ):
     try:
-        return await service.repository.get_by_from_user_id(user_id)
+        return await service.get_rewiews_by_from_user_id(user_id)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e),
@@ -62,7 +62,7 @@ async def get_rewiews_from_by_user_id(
     service: Annotated[RewiewService, Depends(get_rewiew_service)],
 ):
     try:
-        return await service.repository.get_by_to_user_id(user_id)
+        return await service.get_rewiews_by_to_user_id(user_id)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e),
@@ -76,7 +76,7 @@ async def get_rewiews_category(
     service: Annotated[RewiewService, Depends(get_rewiew_service)],
 ):
     try:
-        return await service.repository.get_by_category(category)
+        return await service.get_rewiews_by_category(category)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e),
@@ -90,7 +90,21 @@ async def get_rewiews_category(
     service: Annotated[RewiewService, Depends(get_rewiew_service)],
 ):
     try:
-        return await service.repository.get_by_positive(is_positive)
+        return await service.get_rewiews_by_positive(is_positive)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e),
+        )
+
+@router.get(
+    "/rate/{rate}", status_code=status.HTTP_200_OK,
+)
+async def get_rewiews_rate(
+    rate: int,
+    service: Annotated[RewiewService, Depends(get_rewiew_service)],
+):
+    try:
+        return await service.get_rewiews_by_rate(rate)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e),
