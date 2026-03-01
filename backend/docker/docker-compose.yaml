@@ -90,6 +90,22 @@ services:
     networks:
       - app-network
 
+  nginx:  # <--- ИСПРАВЛЕНО: добавлен отступ в 2 пробела
+    build: 
+      context: ../
+      dockerfile: docker/nginx.Dockerfile
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    restart: unless-stopped
+    depends_on:  # Добавим зависимости от сервисов
+      - auth_service
+      - rate_service
+      - survey_service
+      - postgres
+
 volumes:
   postgres_data:
   redis_data:
