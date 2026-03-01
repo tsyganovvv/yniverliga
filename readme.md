@@ -49,6 +49,7 @@ docker compose -f backend/docker/docker-compose.yaml run --rm rate_service alemb
 | GET | `/v1/reviews/to/{user_id}` | Отзывы на пользователя |
 | GET | `/v1/reviews/category/{category}` | Отзывы по категории |
 | GET | `/v1/reviews/positive/{is_positive}` | Отзывы по полярности |
+| GET | `/v1/reviews/rate/{rate}` | Отзывы по оценке `rate` |
 
 ## 3. Форматы запросов
 
@@ -133,12 +134,12 @@ docker compose -f backend/docker/docker-compose.yaml run --rm rate_service alemb
   "comment": "Быстро синхронизировал команду",
   "episode_key": "release-2026-03",
   "is_positive": true,
-  "score": 4
+  "rate": 4
 }
 ```
 
 Ограничения:
-- `score`: от `-5` до `5`
+- `rate`: от `1` до `5`
 - уникальность эпизода: `(from_user_id, to_user_id, episode_key)`
 
 ## 4. cURL прогоны
@@ -177,9 +178,9 @@ curl -sS -X POST "$AUTH/v1/users/" \
 # 3) Проверяем список пользователей
 curl -sS "$AUTH/v1/users/"
 
-# 4) Получаем UUID пользователей (вариант с jq)
-ALICE_ID=$(curl -sS "$AUTH/v1/users/alice" | jq -r '.id')
-BOB_ID=$(curl -sS "$AUTH/v1/users/bob" | jq -r '.id')
+# 4) Получаем UUID пользователей (без jq)
+ALICE_ID=$(curl -sS "$AUTH/v1/users/alice" | sed -n 's/.*"id":"\([^"]*\)".*/\1/p')
+BOB_ID=$(curl -sS "$AUTH/v1/users/bob" | sed -n 's/.*"id":"\([^"]*\)".*/\1/p')
 
 # 5) Логинимся и извлекаем токен из заголовка
 TOKEN=$(curl -si -X POST "$AUTH/v1/sessions/" \
@@ -198,7 +199,7 @@ curl -sS -X POST "$RATE/v1/topics/" \
 # 8) Создаем отзыв
 curl -sS -X POST "$RATE/v1/reviews/" \
   -H 'Content-Type: application/json' \
-  -d "{\"from_user_id\":\"$ALICE_ID\",\"to_user_id\":\"$BOB_ID\",\"topic\":\"Коммуникация\",\"category\":\"ясность\",\"subcategories\":[\"ясность\",\"доступность\"],\"context\":\"Совместная подготовка релиза\",\"comment\":\"Быстро синхронизировал команду\",\"episode_key\":\"release-2026-03\",\"is_positive\":true,\"score\":4}"
+  -d "{\"from_user_id\":\"$ALICE_ID\",\"to_user_id\":\"$BOB_ID\",\"topic\":\"Коммуникация\",\"category\":\"ясность\",\"subcategories\":[\"ясность\",\"доступность\"],\"context\":\"Совместная подготовка релиза\",\"comment\":\"Быстро синхронизировал команду\",\"episode_key\":\"release-2026-03\",\"is_positive\":true,\"rate\":4}"
 
 # 9) Фильтры по отзывам
 curl -sS "$RATE/v1/reviews/"
@@ -206,6 +207,7 @@ curl -sS "$RATE/v1/reviews/from/$ALICE_ID"
 curl -sS "$RATE/v1/reviews/to/$BOB_ID"
 curl -sS "$RATE/v1/reviews/category/ясность"
 curl -sS "$RATE/v1/reviews/positive/true"
+curl -sS "$RATE/v1/reviews/rate/4"
 ```
 
 ### Прогон C: Проверка блокировки дубля эпизода
@@ -214,7 +216,7 @@ curl -sS "$RATE/v1/reviews/positive/true"
 curl -sS -o /tmp/review_dup.json -w '%{http_code}\n' \
   -X POST "$RATE/v1/reviews/" \
   -H 'Content-Type: application/json' \
-  -d "{\"from_user_id\":\"$ALICE_ID\",\"to_user_id\":\"$BOB_ID\",\"topic\":\"Коммуникация\",\"category\":\"ясность\",\"subcategories\":[\"ясность\"],\"context\":\"Повтор\",\"comment\":\"Повтор\",\"episode_key\":\"release-2026-03\",\"is_positive\":true,\"score\":5}"
+  -d "{\"from_user_id\":\"$ALICE_ID\",\"to_user_id\":\"$BOB_ID\",\"topic\":\"Коммуникация\",\"category\":\"ясность\",\"subcategories\":[\"ясность\"],\"context\":\"Повтор\",\"comment\":\"Повтор\",\"episode_key\":\"release-2026-03\",\"is_positive\":true,\"rate\":5}"
 cat /tmp/review_dup.json
 ```
 

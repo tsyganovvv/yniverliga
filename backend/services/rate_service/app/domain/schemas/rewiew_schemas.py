@@ -14,4 +14,4 @@ class RewiewSchema(Base):
     comment: str
     episode_key: str | None = None
     is_positive: bool
-    score: int | None = Field(default=None, ge=-5, le=5)
+    rate: int = Field(ge=1, le=5)

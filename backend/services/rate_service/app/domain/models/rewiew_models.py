@@ -23,6 +23,7 @@ class Rewiew(BaseModel):
         Index("ix_rewiews_created_at", "created_at"),
         Index("ix_rewiews_category", "category"),
         Index("ix_rewiews_is_positive", "is_positive"),
+        Index("ix_rewiews_rate", "rate"),
         Index("ix_rewiews_to_user_created_at", "to_user_id", "created_at"),
         Index("ix_rewiews_subcategories_gin", "subcategories", postgresql_using="gin"),
         Index(
@@ -34,8 +35,8 @@ class Rewiew(BaseModel):
             postgresql_where=text("episode_key IS NOT NULL"),
         ),
         CheckConstraint(
-            "score IS NULL OR score BETWEEN -5 AND 5",
-            name="ck_rewiews_score_range",
+            "rate BETWEEN 1 AND 5",
+            name="ck_rewiews_rate_range",
         ),
     )
 
@@ -57,4 +58,4 @@ class Rewiew(BaseModel):
     comment = Column(Text, nullable=False)
     episode_key = Column(String(255), nullable=True)
     is_positive = Column(Boolean, nullable=False, default=True)
-    score = Column(SmallInteger, nullable=True)
+    rate = Column(SmallInteger, nullable=False)
