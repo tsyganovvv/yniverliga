@@ -23,6 +23,16 @@ services:
     container_name: auth_service
     ports:
       - "8000:8000"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/v1/api/health')\"",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
     depends_on:
       postgres:
         condition: service_healthy
@@ -39,6 +49,16 @@ services:
     container_name: rate_service
     ports:
       - "8001:8001"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/v1/reviews/health')\"",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
     depends_on:
       postgres:
         condition: service_healthy

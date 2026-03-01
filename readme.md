@@ -1,42 +1,33 @@
 # API документация и cURL прогоны
 
-Документ покрывает все текущие эндпоинты проекта:
+Документ покрывает текущие эндпоинты проекта:
 - `auth_service` на `http://localhost:8000`
 - `rate_service` на `http://localhost:8001`
 
-Важно: в коде используется имя `rewiew` (не `review`) в путях/моделях. В командах ниже это уже учтено.
+Важно: в коде используется имя `rewiew` (не `review`) в путях/моделях.
 
 ## 1. Быстрый запуск
 
 ```bash
-docker compose -f backend/docker/docker-compose.yaml up -d postgres auth_service rate_service
+docker compose -f backend/docker/docker-compose.yaml up -d --build
 ```
 
-`alembic upgrade head` выполняется автоматически при старте `auth_service` и `rate_service`.
-Ручной запуск миграций обычно не нужен.
-
-Если хотите прогнать миграции отдельно вручную:
+Проверка статуса:
 
 ```bash
-docker compose -f backend/docker/docker-compose.yaml run --rm auth_service alembic upgrade head
-docker compose -f backend/docker/docker-compose.yaml run --rm rate_service alembic upgrade head
+docker compose -f backend/docker/docker-compose.yaml ps
 ```
 
-После применения миграций база автоматически заполняется синтетическими данными:
-- `auth_service`: департаменты, пользователи, сессии;
-- `rate_service`: темы и отзывы с корректными внешними ключами на пользователей.
+Проверка health:
 
-Тестовые пользователи (пароль у всех: `pass123`):
-- `seed_alice`
-- `seed_bob`
-- `seed_carol`
+```bash
+curl -sS http://localhost:8000/v1/api/health
+curl -sS http://localhost:8001/v1/reviews/health
+```
 
-Синтетические связи:
-- пользователи привязаны к департаментам;
-- сессии привязаны к пользователям;
-- отзывы `rewiews.from_user_id/to_user_id` привязаны к тем же пользователям.
-
-Важно: сначала применяйте миграции `auth_service`, затем `rate_service` (как в командах выше), чтобы гарантированно загрузить полный набор связанных seed-данных.
+Примечание по БД:
+- таблицы создаются приложениями через SQLAlchemy (`Base.metadata.create_all`) при старте сервисов;
+- alembic-миграции не выполняются автоматически на старте контейнеров.
 
 ## 2. Полный список эндпоинтов
 
@@ -152,10 +143,6 @@ docker compose -f backend/docker/docker-compose.yaml run --rm rate_service alemb
   "to_user_id": "<UUID>",
   "topic": "Коммуникация",
   "category": "ясность",
-  "subcategories": ["ясность", "доступность"],
-  "context": "Совместная подготовка релиза",
-  "comment": "Быстро синхронизировал команду",
-  "episode_key": "release-2026-03",
   "is_positive": true,
   "rate": 4
 }
@@ -163,7 +150,6 @@ docker compose -f backend/docker/docker-compose.yaml run --rm rate_service alemb
 
 Ограничения:
 - `rate`: от `1` до `5`
-- уникальность эпизода: `(from_user_id, to_user_id, episode_key)`
 
 ## 4. cURL прогоны
 
@@ -176,25 +162,6 @@ curl -sS http://localhost:8000/v1/users/health
 curl -sS http://localhost:8000/v1/sessions/health
 curl -sS http://localhost:8001/v1/topics/health
 curl -sS http://localhost:8001/v1/reviews/health
-```
-
-### Прогон A1: Проверка синтетических данных из миграций
-
-```bash
-AUTH=http://localhost:8000
-RATE=http://localhost:8001
-
-curl -sS "$AUTH/v1/users/seed_alice"
-curl -sS "$AUTH/v1/users/seed_bob"
-curl -sS "$RATE/v1/topics/"
-curl -sS "$RATE/v1/reviews/"
-
-TOKEN=$(curl -si -X POST "$AUTH/v1/sessions/" \
-  -H 'Content-Type: application/json' \
-  -d '{"username":"seed_alice","password":"pass123"}' \
-  | tr -d '\r' | awk -F': ' '/^x-auth-token:/{print $2}')
-
-curl -sS -H "Authorization: Bearer $TOKEN" "$AUTH/v1/sessions/"
 ```
 
 ### Прогон B: Полный сценарий (CRUD + авторизация + отзывы)
@@ -241,7 +208,7 @@ curl -sS -X POST "$RATE/v1/topics/" \
 # 8) Создаем отзыв
 curl -sS -X POST "$RATE/v1/reviews/" \
   -H 'Content-Type: application/json' \
-  -d "{\"from_user_id\":\"$ALICE_ID\",\"to_user_id\":\"$BOB_ID\",\"topic\":\"Коммуникация\",\"category\":\"ясность\",\"subcategories\":[\"ясность\",\"доступность\"],\"context\":\"Совместная подготовка релиза\",\"comment\":\"Быстро синхронизировал команду\",\"episode_key\":\"release-2026-03\",\"is_positive\":true,\"rate\":4}"
+  -d "{\"from_user_id\":\"$ALICE_ID\",\"to_user_id\":\"$BOB_ID\",\"topic\":\"Коммуникация\",\"category\":\"ясность\",\"is_positive\":true,\"rate\":4}"
 
 # 9) Фильтры по отзывам
 curl -sS "$RATE/v1/reviews/"
@@ -252,20 +219,8 @@ curl -sS "$RATE/v1/reviews/positive/true"
 curl -sS "$RATE/v1/reviews/rate/4"
 ```
 
-### Прогон C: Проверка блокировки дубля эпизода
-
-```bash
-curl -sS -o /tmp/review_dup.json -w '%{http_code}\n' \
-  -X POST "$RATE/v1/reviews/" \
-  -H 'Content-Type: application/json' \
-  -d "{\"from_user_id\":\"$ALICE_ID\",\"to_user_id\":\"$BOB_ID\",\"topic\":\"Коммуникация\",\"category\":\"ясность\",\"subcategories\":[\"ясность\"],\"context\":\"Повтор\",\"comment\":\"Повтор\",\"episode_key\":\"release-2026-03\",\"is_positive\":true,\"rate\":5}"
-cat /tmp/review_dup.json
-```
-
-Ожидаемо: HTTP `400` с текстом про `duplicate key` и `uq_rewiew_episode_once`.
-
 ## 5. Примечания по текущему поведению API
 
 - `GET /v1/users/` возвращает `404`, если пользователей нет.
-- В `sessions` логин сейчас принимает поле `username`.
+- В `sessions` логин принимает поле `username`.
 - Эндпоинты удаления/обновления не реализуют отдельную авторизацию на уровне роутов.

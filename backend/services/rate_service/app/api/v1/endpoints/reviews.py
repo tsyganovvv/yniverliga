@@ -57,7 +57,7 @@ async def get_rewiews_from_by_user_id(
 @router.get(
     "/to/{user_id}", status_code=status.HTTP_200_OK,
 )
-async def get_rewiews_from_by_user_id(
+async def get_rewiews_to_by_user_id(
     user_id: UUID,
     service: Annotated[RewiewService, Depends(get_rewiew_service)],
 ):
@@ -85,7 +85,7 @@ async def get_rewiews_category(
 @router.get(
     "/positive/{is_positive}", status_code=status.HTTP_200_OK,
 )
-async def get_rewiews_category(
+async def get_rewiews_positive(
     is_positive: bool,
     service: Annotated[RewiewService, Depends(get_rewiew_service)],
 ):

@@ -1,5 +1,5 @@
 from uuid import UUID
-from sqlalchemy import delete, select, update
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.models.rewiew_models import Rewiew
@@ -52,10 +52,6 @@ class RewiewRepository:
         db_rewiew = Rewiew(
             topic=rewiew_data.topic,
             category=rewiew_data.category,
-            subcategories=rewiew_data.subcategories,
-            context=rewiew_data.context,
-            comment=rewiew_data.comment,
-            episode_key=rewiew_data.episode_key,
             to_user_id=rewiew_data.to_user_id,
             from_user_id=rewiew_data.from_user_id,
             is_positive=rewiew_data.is_positive,

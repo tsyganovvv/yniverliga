@@ -9,6 +9,5 @@ class RewiewSchema(Base):
     to_user_id: UUID
     topic: str
     category: str
-    context: str
     is_positive: bool
     rate: int = Field(ge=1, le=5)
