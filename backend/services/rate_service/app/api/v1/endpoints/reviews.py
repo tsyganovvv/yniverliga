@@ -1,6 +1,8 @@
 from uuid import UUID
+from datetime import datetime
 from typing import Annotated
 from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi.responses import Response
 
 from app.domain.schemas.rewiew_schemas import RewiewSchema
 from app.services.rewiew_service import RewiewService
@@ -105,6 +107,52 @@ async def get_rewiews_rate(
 ):
     try:
         return await service.get_rewiews_by_rate(rate)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e),
+        )
+
+
+@router.get(
+    "/report/csv", status_code=status.HTTP_200_OK,
+)
+async def export_rewiews_report_csv(
+    service: Annotated[RewiewService, Depends(get_rewiew_service)],
+):
+    try:
+        report_bytes = await service.export_report_csv()
+        stamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        filename = f"reviews_report_{stamp}.csv"
+        return Response(
+            content=report_bytes,
+            media_type="text/csv; charset=utf-8",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+            },
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e),
+        )
+
+
+@router.get(
+    "/report/excel", status_code=status.HTTP_200_OK,
+)
+async def export_rewiews_report_excel(
+    service: Annotated[RewiewService, Depends(get_rewiew_service)],
+):
+    try:
+        report_bytes = await service.export_report_excel()
+        stamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        filename = f"reviews_report_{stamp}.xlsx"
+        return Response(
+            content=report_bytes,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+            },
+        )
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e),
