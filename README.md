@@ -345,8 +345,4 @@ VITE_RATE_API_BASE_URL=http://localhost:8001
    - `http://localhost:8000/docs`
    - `http://localhost:8001/docs`
 
----
 
-Если нужно, можно вынести этот README в две версии:
-- краткий (`README.md`) для запуска;
-- расширенный (`docs/architecture.md`) для API и схем данных.
