@@ -6,6 +6,19 @@
   --font-wix: "Wix Madefor Display", sans-serif;
 }
 
+@layer base {
+  :where(
+    body,
+    h1, h2, h3, h4, h5, h6,
+    p, span, a, li, label,
+    th, td,
+    button,
+    input, textarea, select, option
+  ) {
+    text-shadow: 0 1px 1px rgba(17, 24, 39, 0.08);
+  }
+}
+
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
