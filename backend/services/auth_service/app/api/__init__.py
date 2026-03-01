@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from .v1.endpoints import api, sessions, users, departments
+from .v1.endpoints import api, departments, profiles, sessions, users
 
 router = APIRouter()
 
@@ -15,4 +15,7 @@ router.include_router(
 )
 router.include_router(
     sessions.router, prefix="/v1/sessions", tags=["sessions"],
+)
+router.include_router(
+    profiles.router, prefix="/v1/profiles", tags=["profiles"],
 )

@@ -10,6 +10,7 @@ from app.domain.schemas.users_schemas import (
 )
 from app.repositories.user_repository import UserRepository
 from app.repositories.departments_repository import DepartmentRepository
+from app.repositories.profile_repository import ProfileRepository
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],
@@ -21,6 +22,7 @@ class UserService:
     def __init__(self, db: AsyncSession) -> None:
         self.repository = UserRepository(db)
         self.department_repository = DepartmentRepository(db)
+        self.profile_repository = ProfileRepository(db)
 
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -52,7 +54,8 @@ class UserService:
             if "department" in message or "foreign key" in message:
                 raise ValueError("undefined departament") from e
             raise ValueError("cannot create user") from e
-        return {
+
+        user_response = {
             "id": user.id,
             "username": user.username,
             "is_active": user.is_active,
@@ -60,6 +63,17 @@ class UserService:
             "fullname": user.fullname,
             "department_id": user.department_id,
         }
+
+        try:
+            await self.profile_repository.create(user.id)
+        except Exception as e:
+            try:
+                await self.repository.delete(user.username)
+            except Exception:
+                pass
+            raise ValueError("cannot create user profile") from e
+
+        return user_response
 
     async def authenticate_user(
         self, email: str, password: str,
