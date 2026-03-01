@@ -21,7 +21,7 @@ class SessionRepository:
         self, user_id: UUID, expires_days: int = 3,
     ) -> SessionModel | None:
         token = secrets.token_urlsafe(32)
-        expire_at = datetime.now() + timedelta(days=expires_days)
+        expire_at = datetime.now(timezone.utc) + timedelta(days=expires_days)
         token_hash = self.get_hash(token)
         session = SessionModel(
             user_id=user_id, token_hash=token_hash, expires_at=expire_at,
@@ -54,4 +54,7 @@ class SessionRepository:
     async def is_valid(self, session: SessionModel):
         if not session:
             return False
-        return datetime.now(timezone=True) < session.expires_at
+        expires_at = session.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        return datetime.now(timezone.utc) < expires_at

@@ -1,6 +1,5 @@
 from datetime import datetime
 from uuid import UUID
-from pydantic import EmailStr
 
 from app.domain.schemas import Base
 
@@ -12,12 +11,14 @@ class UserBase(Base):
 
 
 class UserCreate(UserBase):
+    department_id: UUID
     password: str | None = None
 
 
 class UserUpdate(UserBase):
     username: str | None = None
     fullname: str | None = None
+    department_id: UUID | None = None
     password: str | None = None
 
 

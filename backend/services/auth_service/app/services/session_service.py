@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,21 +26,29 @@ class SessionService:
         return pwd_context.verify(plain_password, hashed_password)
 
     async def login(self, username: str, password: str) -> str:
-        user = await self.Userrepository.get_by_username(username)
+        clean_username = username.strip()
+        user = await self.Userrepository.get_by_username(clean_username)
         if not user:
-            raise ValueError("No such user")
+            raise ValueError("no such user")
+        if not user.hashed_password:
+            raise ValueError("incorrect password")
         if not self.verify(password, user.hashed_password):
-            raise ValueError("Incorrect password")
+            raise ValueError("incorrect password")
         token = await self.Sessionrepository.create_session(user_id=user.id)
         return token
 
     async def get_user_by_token(self, token: str)-> dict | None:
         token_obj = await self.Sessionrepository.get_session_by_token(token)
         if not token_obj:
-            raise ValueError("Error: No such token")
+            raise ValueError("invalid token")
+        expires_at = token_obj.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) >= expires_at:
+            raise ValueError("token expired")
         user = await self.Userrepository.get_by_id(token_obj.user_id)
         if not user:
-            raise ValueError("Error: No such user")
+            raise ValueError("no such user")
         return {
             "id": user.id,
             "username": user.username,

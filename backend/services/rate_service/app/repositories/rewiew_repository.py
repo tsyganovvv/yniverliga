@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.models.rewiew_models import Rewiew
+from app.domain.models.users_models import User
 from app.domain.schemas.rewiew_schemas import RewiewSchema
 
 
@@ -47,6 +48,12 @@ class RewiewRepository:
             select(Rewiew).where(Rewiew.to_user_id == user_id)
         )
         return result.scalars().all()
+
+    async def user_exists(self, user_id: UUID) -> bool:
+        result = await self.db.execute(
+            select(User.id).where(User.id == user_id),
+        )
+        return result.scalar_one_or_none() is not None
     
     async def create(self, rewiew_data: RewiewSchema) -> Rewiew | None:
         db_rewiew = Rewiew(

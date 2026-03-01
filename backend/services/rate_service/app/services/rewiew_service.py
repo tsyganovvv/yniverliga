@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.rewiew_repository import RewiewRepository
@@ -16,10 +17,18 @@ class RewiewService:
         return ValueError(str(error))
     
     async def create_rewiew(self, rewiew_data: RewiewSchema) -> Rewiew:
+        from_user_exists = await self.repository.user_exists(rewiew_data.from_user_id)
+        if not from_user_exists:
+            raise ValueError("undefined user id in from_user_id")
+        to_user_exists = await self.repository.user_exists(rewiew_data.to_user_id)
+        if not to_user_exists:
+            raise ValueError("undefined user id in to_user_id")
         try:
             result = await self.repository.create(rewiew_data)
+        except IntegrityError as e:
+            raise ValueError("undefined user id") from e
         except Exception as e:
-            raise ValueError(str(e))
+            raise self._as_value_error(e)
         return result
 
     async def get_all_rewiews(self) -> list[Rewiew]:

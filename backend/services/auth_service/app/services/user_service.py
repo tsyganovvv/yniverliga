@@ -1,5 +1,6 @@
 
 from passlib.context import CryptContext
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.schemas.users_schemas import (
@@ -33,20 +34,31 @@ class UserService:
         existing_user = await self.repository.get_by_username(user_data.username)
         if existing_user:
             raise ValueError("User with this name already exists")
-        if user_data.password == "":
-            user_data.password = None
-        try:
-            hashed_password = self.get_password_hash(user_data.password)
-        except Exception:
-            hashed_password = None
 
-        user = await self.repository.create(user_data, hashed_password)
+        department = await self.department_repository.get_by_id(
+            str(user_data.department_id),
+        )
+        if not department:
+            raise ValueError("undefined departament")
+
+        if not user_data.password:
+            raise ValueError("password is required")
+
+        hashed_password = self.get_password_hash(user_data.password)
+        try:
+            user = await self.repository.create(user_data, hashed_password)
+        except IntegrityError as e:
+            message = str(e).lower()
+            if "department" in message or "foreign key" in message:
+                raise ValueError("undefined departament") from e
+            raise ValueError("cannot create user") from e
         return {
             "id": user.id,
             "username": user.username,
             "is_active": user.is_active,
             "created_at": user.created_at,
             "fullname": user.fullname,
+            "department_id": user.department_id,
         }
 
     async def authenticate_user(
