@@ -1,6 +1,7 @@
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.domain.models.rewiew_models import Rewiew
 from app.domain.models.users_models import User
@@ -59,6 +60,7 @@ class RewiewRepository:
         db_rewiew = Rewiew(
             topic=rewiew_data.topic,
             category=rewiew_data.category,
+            context=rewiew_data.context,
             to_user_id=rewiew_data.to_user_id,
             from_user_id=rewiew_data.from_user_id,
             is_positive=rewiew_data.is_positive,
@@ -68,3 +70,41 @@ class RewiewRepository:
         await self.db.commit()
         await self.db.refresh(db_rewiew)
         return db_rewiew
+
+    async def get_report_rows(self) -> list[dict]:
+        from_user = aliased(User)
+        to_user = aliased(User)
+
+        result = await self.db.execute(
+            select(
+                Rewiew,
+                from_user.username,
+                from_user.fullname,
+                to_user.username,
+                to_user.fullname,
+            )
+            .outerjoin(from_user, Rewiew.from_user_id == from_user.id)
+            .outerjoin(to_user, Rewiew.to_user_id == to_user.id)
+            .order_by(Rewiew.created_at.desc()),
+        )
+
+        rows = []
+        for rewiew, from_username, from_fullname, to_username, to_fullname in result.all():
+            rows.append(
+                {
+                    "review_id": str(rewiew.id),
+                    "created_at": rewiew.created_at.isoformat() if rewiew.created_at else "",
+                    "from_user_id": str(rewiew.from_user_id) if rewiew.from_user_id else "",
+                    "from_username": from_username or "Удален",
+                    "from_fullname": from_fullname or "Удален",
+                    "to_user_id": str(rewiew.to_user_id) if rewiew.to_user_id else "",
+                    "to_username": to_username or "Удален",
+                    "to_fullname": to_fullname or "Удален",
+                    "context": rewiew.context or "",
+                    "topic": rewiew.topic or "",
+                    "category": rewiew.category or "",
+                    "feedback_type": "Позитивный" if rewiew.is_positive else "Негативный",
+                    "rate": rewiew.rate,
+                }
+            )
+        return rows

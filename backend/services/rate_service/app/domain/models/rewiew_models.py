@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, SmallInteger, String, UUID
+from sqlalchemy import Boolean, Column, ForeignKey, SmallInteger, String, Text, UUID
 
 from app.domain.models import BaseModel
 
@@ -18,5 +18,6 @@ class Rewiew(BaseModel):
     )
     topic = Column(String(255), nullable=False)
     category = Column(String(255), nullable=False)
+    context = Column(Text, nullable=False, default="", server_default="")
     is_positive = Column(Boolean, nullable=False, default=True)
     rate = Column(SmallInteger, nullable=False)

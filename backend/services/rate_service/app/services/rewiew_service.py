@@ -1,5 +1,5 @@
-from uuid import UUID
 import csv
+from uuid import UUID
 from html import escape
 from io import BytesIO, StringIO
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -23,14 +23,19 @@ class RewiewService:
     @staticmethod
     def _report_headers() -> list[str]:
         return [
-            "id",
-            "from_user_id",
-            "to_user_id",
-            "topic",
-            "category",
-            "is_positive",
-            "rate",
-            "created_at",
+            "ID отзыва",
+            "Дата отзыва (UTC)",
+            "ID автора",
+            "Username автора",
+            "ФИО автора",
+            "ID получателя",
+            "Username получателя",
+            "ФИО получателя",
+            "Контекст отзыва",
+            "Тема",
+            "Категория",
+            "Тип отзыва",
+            "Оценка (1-5)",
         ]
 
     @staticmethod
@@ -114,19 +119,24 @@ class RewiewService:
         return buff.getvalue()
 
     async def _collect_report_rows(self) -> list[dict]:
-        rewiews = await self.get_all_rewiews()
+        raw_rows = await self.repository.get_report_rows()
         rows = []
-        for item in rewiews:
+        for item in raw_rows:
             rows.append(
                 {
-                    "id": str(item.id),
-                    "from_user_id": str(item.from_user_id) if item.from_user_id else "",
-                    "to_user_id": str(item.to_user_id) if item.to_user_id else "",
-                    "topic": item.topic or "",
-                    "category": item.category or "",
-                    "is_positive": str(bool(item.is_positive)),
-                    "rate": item.rate,
-                    "created_at": item.created_at.isoformat() if item.created_at else "",
+                    "ID отзыва": item["review_id"],
+                    "Дата отзыва (UTC)": item["created_at"],
+                    "ID автора": item["from_user_id"],
+                    "Username автора": item["from_username"],
+                    "ФИО автора": item["from_fullname"],
+                    "ID получателя": item["to_user_id"],
+                    "Username получателя": item["to_username"],
+                    "ФИО получателя": item["to_fullname"],
+                    "Контекст отзыва": item["context"],
+                    "Тема": item["topic"],
+                    "Категория": item["category"],
+                    "Тип отзыва": item["feedback_type"],
+                    "Оценка (1-5)": item["rate"],
                 }
             )
         return rows
@@ -135,11 +145,11 @@ class RewiewService:
         headers = self._report_headers()
         rows = await self._collect_report_rows()
         buff = StringIO()
-        writer = csv.DictWriter(buff, fieldnames=headers)
+        writer = csv.DictWriter(buff, fieldnames=headers, delimiter=";")
         writer.writeheader()
         for row in rows:
             writer.writerow(row)
-        return buff.getvalue().encode("utf-8")
+        return buff.getvalue().encode("utf-8-sig")
 
     async def export_report_excel(self) -> bytes:
         headers = self._report_headers()
