@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, LogOut } from 'lucide-react';
 import ClimateMonitoringGraph from '../components/ClimateMonitoringGraph';
 import ReviewsTable from '../components/ReviewsTable';
 import AnalyticsPage from '../components/AnalyticsPage';
+import { useAuth } from '../auth/AuthContext';
 
 const navItems = [
   { name: 'Сотрудники', id: 'employees' },
@@ -24,6 +25,7 @@ const stats = [
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('reviews');
   const navigate = useNavigate();
+  const { session, logout } = useAuth();
 
   const handleTabClick = (tabId: string) => {
     if (tabId === 'employees') {
@@ -33,13 +35,18 @@ export default function DashboardPage() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/', { replace: true });
+  };
+
   return (
     <div className="min-h-screen pb-20 bg-white font-wix">
       {/* Header */}
       <header className="flex items-center justify-between px-8 py-6 bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="flex-1 flex items-center">
           <div className="w-10 h-10 flex items-center justify-center">
-             <BarChartIcon />
+            <BarChartIcon />
           </div>
         </div>
         <nav className="flex items-center space-x-12">
@@ -48,8 +55,8 @@ export default function DashboardPage() {
               key={item.id}
               onClick={() => handleTabClick(item.id)}
               className={`text-sm font-semibold transition-colors relative ${
-                activeTab === item.id 
-                  ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#FFCC00] via-[#FF8800] to-[#FF0000]' 
+                activeTab === item.id
+                  ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#FFCC00] via-[#FF8800] to-[#FF0000]'
                   : 'text-gray-500 hover:text-gray-900'
               }`}
             >
@@ -57,11 +64,22 @@ export default function DashboardPage() {
             </button>
           ))}
         </nav>
-        <div className="flex-1 flex justify-end">
+        <div className="flex-1 flex justify-end items-center gap-4">
+          <div className="hidden md:block text-sm text-gray-600 max-w-[180px] truncate" title={session?.user.username}>
+            {session?.user.fullname || session?.user.username}
+          </div>
+          <button
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
+            onClick={handleLogout}
+            type="button"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Выйти</span>
+          </button>
           <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border border-gray-100">
-            <img 
-              src="https://picsum.photos/seed/user123/100/100" 
-              alt="User" 
+            <img
+              src="https://picsum.photos/seed/user123/100/100"
+              alt="User"
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
             />
@@ -75,9 +93,7 @@ export default function DashboardPage() {
         <main className="max-w-[1440px] mx-auto px-[56px] mt-16">
           {/* Title Section */}
           <div className="flex flex-col items-center justify-center gap-[15px] mb-[70px]">
-            <h1 className="text-[48px] font-bold leading-[60px] text-black text-center">
-              Общая статистика
-            </h1>
+            <h1 className="text-[48px] font-bold leading-[60px] text-black text-center">Общая статистика</h1>
             <p className="text-[18px] font-bold leading-[24px] text-center text-black">
               Агрегированные данные обратной связи
             </p>
@@ -137,10 +153,10 @@ export default function DashboardPage() {
 function BarChartIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 3V21H21" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M18 17V13" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M13 17V9" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M8 17V15" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M3 3V21H21" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M18 17V13" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13 17V9" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 17V15" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

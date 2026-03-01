@@ -50,7 +50,7 @@
 .blackPanel {
     position: absolute;
     top: 0;
-    left: 0;          
+    left: 0;
     width: 50%;
     height: 100%;
     background: black;
@@ -70,8 +70,7 @@
 .panelTitle {
     font-size: clamp(28px, 4vw, 48px);
     margin-bottom: 40px;
-
-    font-weight: 700; /* Bold */
+    font-weight: 700;
 }
 
 .title {
@@ -114,6 +113,11 @@
     font-family: "WixMadeforDisplay", sans-serif;
 }
 
+.gradientBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
 .outlineBtn {
     padding: 16px;
     border-radius: 16px;
@@ -122,6 +126,15 @@
     color: white;
     cursor: pointer;
     font-size: 16px;
-    width: clamp(260px, 30vw, 400px); 
+    width: clamp(260px, 30vw, 400px);
     font-family: "WixMadeforDisplay", sans-serif;
+}
+
+.errorText {
+    width: 100%;
+    margin-top: -6px;
+    margin-bottom: -4px;
+    color: #d92d20;
+    font-size: 14px;
+    text-align: left;
 }

@@ -33,6 +33,7 @@ class UserResponse(UserBase):
     is_active: bool
     created_at: datetime
     updated_at: datetime | None = None
+    role: str | None = None
 
     class Config:
         from_attributes = True
