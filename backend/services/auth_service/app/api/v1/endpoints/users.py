@@ -54,7 +54,6 @@ async def get_user(
     username: str, service: Annotated[UserService, Depends(get_user_service)],
 ):
     user = await service.repository.get_by_username(username=username)
-    print(username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found",
