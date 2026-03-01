@@ -1,10 +1,24 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Plus, Trash2, GripVertical, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Plus, Trash2, GripVertical, CheckCircle2, Save } from 'lucide-react';
 
-export default function QuestionnaireBuilder({ onBack, onSave }: { onBack: () => void, onSave: (data: any) => void }) {
+interface QuestionnaireBuilderProps {
+  onBack: () => void;
+  onSave: (data: any, isDraft?: boolean) => void;
+  initialData?: any;
+}
+
+export default function QuestionnaireBuilder({ onBack, onSave, initialData }: QuestionnaireBuilderProps) {
   const [title, setTitle] = useState('Новая анкета');
   const [description, setDescription] = useState('');
   const [blocks, setBlocks] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title);
+      setDescription(initialData.description || '');
+      setBlocks(initialData.blocks || []);
+    }
+  }, [initialData]);
 
   const addBlock = (type: string) => {
     const newBlock = {
@@ -52,6 +66,14 @@ export default function QuestionnaireBuilder({ onBack, onSave }: { onBack: () =>
       }
       return b;
     }));
+  };
+
+  const handleSaveDraft = () => {
+    onSave({ title, description, blocks }, true);
+  };
+
+  const handleSaveActive = () => {
+    onSave({ title, description, blocks }, false);
   };
 
   return (
@@ -173,9 +195,24 @@ export default function QuestionnaireBuilder({ onBack, onSave }: { onBack: () =>
         </div>
       </div>
 
-      <div className="flex justify-end gap-4">
+      <div className="flex justify-between items-center">
         <button onClick={onBack} className="px-6 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-colors">Отмена</button>
-        <button onClick={() => onSave({ title, description, blocks })} className="px-8 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-colors shadow-lg">Сохранить анкету</button>
+        
+        <div className="flex gap-4">
+          <button 
+            onClick={handleSaveDraft} 
+            className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition-colors"
+          >
+            <Save className="w-5 h-5" />
+            Сохранить черновик
+          </button>
+          <button 
+            onClick={handleSaveActive} 
+            className="px-8 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-colors shadow-lg"
+          >
+            Опубликовать анкету
+          </button>
+        </div>
       </div>
     </div>
   );

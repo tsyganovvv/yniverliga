@@ -1,0 +1,234 @@
+.page {
+  min-height: 100vh;
+  background: #f2f2f2;
+}
+
+.header {
+  background: #000;
+  color: white;
+  padding: 60px 40px;
+  text-align: center;
+  position: relative;
+}
+
+.backButton {
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.backButton:hover {
+  opacity: 0.7;
+}
+
+.backIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.header h1 {
+  font-size: 48px;
+  font-weight: 700;
+  font-family: 'Wix Madefor Display', sans-serif;
+}
+
+.content {
+  display: flex;
+  justify-content: center;
+  padding: 60px 40px;
+}
+
+.card {
+  width: 100%;
+  max-width: 800px;
+  background: white;
+  padding: 50px;
+  border-radius: 30px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+.cardTitle {
+  font-size: 32px;
+  font-weight: 700;
+  font-family: 'Wix Madefor Display', sans-serif;
+  flex: 1;
+}
+
+.deadline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #fff3e0;
+  border-radius: 10px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.calendarIcon {
+  width: 16px;
+  height: 16px;
+  color: #ff9800;
+}
+
+.description {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.questions {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.question {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.questionLabel {
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+}
+
+.required {
+  color: #ff3d00;
+}
+
+.ratingContainer {
+  display: flex;
+  gap: 12px;
+}
+
+.ratingButton {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+  background: white;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ratingButton:hover {
+  border-color: #000;
+}
+
+.activeRating {
+  background: #000;
+  color: white;
+  border-color: #000;
+}
+
+.textarea {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+  font-family: inherit;
+  font-size: 15px;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #000;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  background: linear-gradient(90deg, #ffb100, #ff3d00);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.submitButton:hover {
+  opacity: 0.9;
+}
+
+.successCard {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  padding: 60px 50px;
+  border-radius: 30px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  text-align: center;
+}
+
+.successIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4caf50, #8bc34a);
+  color: white;
+  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 30px;
+}
+
+.successTitle {
+  font-size: 32px;
+  font-weight: 700;
+  font-family: 'Wix Madefor Display', sans-serif;
+  margin-bottom: 16px;
+}
+
+.successText {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.backToTeamButton {
+  padding: 14px 32px;
+  border: 2px solid #000;
+  background: transparent;
+  color: #000;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.backToTeamButton:hover {
+  background: #000;
+  color: white;
+}

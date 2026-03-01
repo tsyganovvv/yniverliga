@@ -58,7 +58,6 @@ export default function ClimateMonitoringGraph() {
         const { width, height } = entry.contentRect;
         if (width > 0 && height > 0) {
           setDimensions({ width, height });
-          // Re-center the graph when dimensions change
           setTimeout(() => {
             if (fgRef.current) {
               fgRef.current.zoomToFit(400, 100);
@@ -74,11 +73,8 @@ export default function ClimateMonitoringGraph() {
 
   useEffect(() => {
     if (fgRef.current) {
-      // Сила отталкивания узлов
       fgRef.current.d3Force('charge')?.strength(-300);
-      // Уменьшаем расстояние между узлами для более компактного вида
       fgRef.current.d3Force('link')?.distance(40);
-      // Сила центрирования
       fgRef.current.d3Force('center')?.strength(0.8);
     }
   }, []);
@@ -92,7 +88,6 @@ export default function ClimateMonitoringGraph() {
 
   return (
     <div ref={containerRef} className="relative w-full h-[600px] bg-white rounded-[32px] overflow-hidden mt-12 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-      {/* UI Overlay */}
       <div className="absolute top-8 left-8 w-80 z-10 pointer-events-none">
         <div className="glass-card pointer-events-auto">
           <h1 className="text-[#111827] text-lg font-bold mb-2">Мониторинг климата</h1>
@@ -126,8 +121,8 @@ export default function ClimateMonitoringGraph() {
   nodeId="id"
   nodeVal={15} 
   
-  d3AlphaDecay={0.05} // Чтобы граф быстрее застывал
-  d3VelocityDecay={0.3} // Для более плавного затухания движения
+  d3AlphaDecay={0.05}
+  d3VelocityDecay={0.3}
   
   linkDirectionalArrowLength={5}
   linkDirectionalArrowRelPos={1}

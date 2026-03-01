@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Plus, BarChart2, FileText, ChevronDown } from 'lucide-react';
 import { 
@@ -33,11 +33,80 @@ const pieData = [
 
 const COLORS = ['#00AE1D', '#FFCC00', '#FF0000'];
 
+interface Questionnaire {
+  id: string;
+  title: string;
+  description: string;
+  blocks: any[];
+  status: 'draft' | 'active' | 'completed';
+  createdAt: string;
+}
+
 const AnalyticsPage: React.FC = () => {
   const [view, setView] = useState<'dashboard' | 'builder' | 'report'>('dashboard');
+  const [questionnaires, setQuestionnaires] = useState<Questionnaire[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState('Последний месяц');
+  const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
+
+  const periods = ['Последний месяц', 'Последние 3 месяца', 'Последние 6 месяцев', 'Последний год', 'Все время'];
+
+  useEffect(() => {
+    // Load questionnaires from localStorage
+    const saved = localStorage.getItem('questionnaires');
+    if (saved) {
+      setQuestionnaires(JSON.parse(saved));
+    }
+  }, []);
+
+  const saveQuestionnaires = (data: Questionnaire[]) => {
+    localStorage.setItem('questionnaires', JSON.stringify(data));
+    setQuestionnaires(data);
+  };
+
+  const handleSave = (data: any, isDraft: boolean = false) => {
+    const questionnaire: Questionnaire = {
+      id: editingId || Date.now().toString(),
+      title: data.title,
+      description: data.description,
+      blocks: data.blocks,
+      status: isDraft ? 'draft' : 'active',
+      createdAt: new Date().toISOString(),
+    };
+
+    if (editingId) {
+      saveQuestionnaires(questionnaires.map(q => q.id === editingId ? questionnaire : q));
+    } else {
+      saveQuestionnaires([...questionnaires, questionnaire]);
+    }
+
+    setEditingId(null);
+    setView('dashboard');
+  };
+
+  const handleEdit = (id: string) => {
+    setEditingId(id);
+    setView('builder');
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('Удалить эту анкету?')) {
+      saveQuestionnaires(questionnaires.filter(q => q.id !== id));
+    }
+  };
 
   if (view === 'builder') {
-    return <QuestionnaireBuilder onBack={() => setView('dashboard')} onSave={() => setView('dashboard')} />;
+    const editingQuestionnaire = editingId ? questionnaires.find(q => q.id === editingId) : null;
+    return (
+      <QuestionnaireBuilder 
+        onBack={() => {
+          setView('dashboard');
+          setEditingId(null);
+        }} 
+        onSave={handleSave}
+        initialData={editingQuestionnaire}
+      />
+    );
   }
 
   if (view === 'report') {
@@ -62,28 +131,43 @@ const AnalyticsPage: React.FC = () => {
         {/* Top Stats Cards */}
         <div className="flex justify-center items-center gap-[20px] mb-[70px]">
           {/* Card 1 */}
-          <div className="w-[200px] h-[180px] bg-white border border-black rounded-[30px] shadow-[5px_5px_30px_rgba(0,0,0,0.25)] flex flex-col items-center justify-center p-[20px] gap-1">
-            <span className="text-[42px] font-bold leading-[50px] text-black">8</span>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0, duration: 0.4 }}
+            className="w-[200px] h-[180px] bg-white border border-black rounded-[30px] shadow-[5px_5px_30px_rgba(0,0,0,0.25)] flex flex-col items-center justify-center p-[20px] gap-1"
+          >
+            <span className="text-[42px] font-bold leading-[50px] text-black">{questionnaires.filter(q => q.status !== 'draft').length}</span>
             <p className="text-[14px] font-bold leading-[20px] text-center text-black">
               анкетирований проведено
             </p>
-          </div>
+          </motion.div>
 
           {/* Card 2 */}
-          <div className="w-[200px] h-[180px] bg-white border border-black rounded-[30px] shadow-[5px_5px_30px_rgba(0,0,0,0.25)] flex flex-col items-center justify-center p-[20px] gap-1">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+            className="w-[200px] h-[180px] bg-white border border-black rounded-[30px] shadow-[5px_5px_30px_rgba(0,0,0,0.25)] flex flex-col items-center justify-center p-[20px] gap-1"
+          >
             <span className="text-[42px] font-bold leading-[50px] text-black">215</span>
             <p className="text-[14px] font-bold leading-[20px] text-center text-black">
               сотрудников показали <span className="text-[#00AE1D]">прогресс</span>
             </p>
-          </div>
+          </motion.div>
 
           {/* Card 3 */}
-          <div className="w-[200px] h-[180px] bg-white border border-black rounded-[30px] shadow-[5px_5px_30px_rgba(0,0,0,0.25)] flex flex-col items-center justify-center p-[20px] gap-1">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="w-[200px] h-[180px] bg-white border border-black rounded-[30px] shadow-[5px_5px_30px_rgba(0,0,0,0.25)] flex flex-col items-center justify-center p-[20px] gap-1"
+          >
             <span className="text-[42px] font-bold leading-[50px] text-black">47</span>
             <p className="text-[14px] font-bold leading-[20px] text-center text-black">
               сотрудников показали <span className="text-[#FF0000]">регресс</span>
             </p>
-          </div>
+          </motion.div>
         </div>
 
         {/* Questionnaire Section Header */}
@@ -100,75 +184,78 @@ const AnalyticsPage: React.FC = () => {
         {/* Questionnaire Cards Grid */}
         <div className="flex gap-[30px] mb-[70px] overflow-x-auto pb-4 no-scrollbar">
           {/* New Questionnaire Card */}
-          <div className="flex flex-col items-center gap-5 min-w-[200px]">
+          <div className="flex flex-col items-center gap-5 min-w-[140px]">
             <div 
-              onClick={() => setView('builder')}
-              className="w-[200px] h-[200px] bg-white border border-black rounded-[30px] flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors shadow-sm hover:shadow-md"
+              onClick={() => {
+                setEditingId(null);
+                setView('builder');
+              }}
+              className="w-[140px] h-[140px] bg-white border border-black rounded-[20px] flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors shadow-sm hover:shadow-md"
             >
-              <Plus className="w-[80px] h-[80px] text-black" strokeWidth={1} />
+              <Plus className="w-[50px] h-[50px] text-black" strokeWidth={1} />
             </div>
-            <span className="text-[16px] font-bold text-center">Новая анкета</span>
+            <span className="text-[14px] font-bold text-center">Новая анкета</span>
           </div>
 
-          {/* Card 2 - Active */}
-          <div className="flex flex-col items-center gap-5 min-w-[200px]">
-            <div 
-              onClick={() => setView('report')}
-              className="w-[200px] h-[200px] bg-white border border-black rounded-[30px] flex flex-col items-center justify-center p-8 gap-4 relative cursor-pointer hover:bg-gray-50 transition-colors shadow-sm hover:shadow-md"
-            >
-              <BarChart2 className="w-[48px] h-[48px] text-gray-400" />
-              <div className="flex flex-col items-center gap-2">
-                <span className="text-[12px] font-bold text-center">Смотреть анкету</span>
-                <div className="bg-[#00AE1D] px-3 py-1 rounded-full">
-                  <span className="text-[8px] font-bold text-white uppercase">Активна</span>
-                </div>
+          {/* Display saved questionnaires */}
+          {questionnaires.map((questionnaire) => (
+            <div key={questionnaire.id} className="flex flex-col items-center gap-5 min-w-[140px]">
+              <div 
+                onClick={() => questionnaire.status === 'draft' ? handleEdit(questionnaire.id) : setView('report')}
+                className="w-[140px] h-[140px] bg-white border border-black rounded-[20px] flex flex-col items-center justify-center p-5 gap-3 relative cursor-pointer hover:bg-gray-50 transition-colors shadow-sm hover:shadow-md group"
+              >
+                {questionnaire.status === 'draft' ? (
+                  <>
+                    <FileText className="w-[32px] h-[32px] text-gray-400" strokeWidth={1.5} />
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-[10px] font-bold text-center">Черновик</span>
+                      <span className="text-[10px] font-bold text-black opacity-60">
+                        {new Date(questionnaire.createdAt).toLocaleDateString('ru-RU')}
+                      </span>
+                    </div>
+                  </>
+                ) : questionnaire.status === 'active' ? (
+                  <>
+                    <BarChart2 className="w-[32px] h-[32px] text-gray-400" />
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="text-[10px] font-bold text-center">Смотреть анкету</span>
+                      <div className="bg-[#00AE1D] px-2 py-0.5 rounded-full">
+                        <span className="text-[8px] font-bold text-white uppercase">Активна</span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-[32px] h-[32px] bg-gradient-to-r from-[#FFCC00] via-[#FF8800] to-[#FF0000] rounded-lg flex items-center justify-center">
+                      <BarChart2 className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-[10px] font-bold text-center">Смотреть анкету</span>
+                      <span className="text-[10px] font-bold text-black opacity-60">
+                        {new Date(questionnaire.createdAt).toLocaleDateString('ru-RU')}
+                      </span>
+                    </div>
+                  </>
+                )}
+                
+                {/* Delete button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(questionnaire.id);
+                  }}
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
+              <span className="text-[14px] font-bold text-center">
+                {questionnaire.title.length > 15 ? questionnaire.title.substring(0, 15) + '...' : questionnaire.title}
+              </span>
             </div>
-            <span className="text-[16px] font-bold text-center">Оценка командного взаи...</span>
-          </div>
-
-          {/* Card 3 */}
-          <div className="flex flex-col items-center gap-5 min-w-[200px]">
-            <div 
-              onClick={() => setView('report')}
-              className="w-[200px] h-[200px] bg-white border border-black rounded-[30px] flex flex-col items-center justify-center p-8 gap-4 cursor-pointer hover:bg-gray-50 transition-colors shadow-sm hover:shadow-md"
-            >
-              <div className="w-[48px] h-[48px] bg-gradient-to-r from-[#FFCC00] via-[#FF8800] to-[#FF0000] rounded-lg flex items-center justify-center">
-                <BarChart2 className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-[12px] font-bold text-center">Смотреть анкету</span>
-                <span className="text-[12px] font-bold text-black opacity-60">28.02.2026</span>
-              </div>
-            </div>
-            <span className="text-[16px] font-bold text-center">Удовлетворённость рабо...</span>
-          </div>
-
-          {/* Card 4 - Draft */}
-          <div className="flex flex-col items-center gap-5 min-w-[200px]">
-            <div className="w-[200px] h-[200px] bg-white border border-black rounded-[30px] flex flex-col items-center justify-center p-8 gap-4">
-              <FileText className="w-[48px] h-[48px] text-black" strokeWidth={1.5} />
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-[12px] font-bold text-center">Черновик</span>
-                <span className="text-[12px] font-bold text-black opacity-60">12.02.2026</span>
-              </div>
-            </div>
-            <span className="text-[16px] font-bold text-center">Эффективность текущих...</span>
-          </div>
-
-          {/* Card 5 */}
-          <div className="flex flex-col items-center gap-5 min-w-[200px]">
-            <div className="w-[200px] h-[200px] bg-white border border-black rounded-[30px] flex flex-col items-center justify-center p-8 gap-4">
-              <div className="w-[48px] h-[48px] bg-gradient-to-r from-[#FFCC00] via-[#FF8800] to-[#FF0000] rounded-lg flex items-center justify-center">
-                <BarChart2 className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-[12px] font-bold text-center">Смотреть анкету</span>
-                <span className="text-[12px] font-bold text-black opacity-60">27.08.2025</span>
-              </div>
-            </div>
-            <span className="text-[16px] font-bold text-center">Эффективность текущих...</span>
-          </div>
+          ))}
         </div>
 
         {/* Analysis Section Header */}
@@ -181,10 +268,33 @@ const AnalyticsPage: React.FC = () => {
               <span>Все команды</span>
               <ChevronDown className="w-5 h-5" />
             </button>
-            <button className="flex items-center justify-between px-5 py-4 w-[185px] border border-black rounded-[20px] text-[14px] font-bold">
-              <span>Последний месяц</span>
-              <ChevronDown className="w-5 h-5" />
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowPeriodDropdown(!showPeriodDropdown)}
+                className="flex items-center justify-between px-5 py-4 w-[185px] border border-black rounded-[20px] text-[14px] font-bold"
+              >
+                <span>{selectedPeriod}</span>
+                <ChevronDown className="w-5 h-5" />
+              </button>
+              {showPeriodDropdown && (
+                <div className="absolute right-0 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-10">
+                  {periods.map((period) => (
+                    <button
+                      key={period}
+                      onClick={() => {
+                        setSelectedPeriod(period);
+                        setShowPeriodDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors first:rounded-t-xl last:rounded-b-xl ${
+                        selectedPeriod === period ? 'bg-gray-100 font-semibold' : ''
+                      }`}
+                    >
+                      {period}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
