@@ -15,6 +15,22 @@ docker compose -f backend/docker/docker-compose.yaml run --rm auth_service alemb
 docker compose -f backend/docker/docker-compose.yaml run --rm rate_service alembic upgrade head
 ```
 
+После применения миграций база автоматически заполняется синтетическими данными:
+- `auth_service`: департаменты, пользователи, сессии;
+- `rate_service`: темы и отзывы с корректными внешними ключами на пользователей.
+
+Тестовые пользователи (пароль у всех: `pass123`):
+- `seed_alice`
+- `seed_bob`
+- `seed_carol`
+
+Синтетические связи:
+- пользователи привязаны к департаментам;
+- сессии привязаны к пользователям;
+- отзывы `rewiews.from_user_id/to_user_id` привязаны к тем же пользователям.
+
+Важно: сначала применяйте миграции `auth_service`, затем `rate_service` (как в командах выше), чтобы гарантированно загрузить полный набор связанных seed-данных.
+
 ## 2. Полный список эндпоинтов
 
 ### Auth service (`:8000`)
@@ -153,6 +169,25 @@ curl -sS http://localhost:8000/v1/users/health
 curl -sS http://localhost:8000/v1/sessions/health
 curl -sS http://localhost:8001/v1/topics/health
 curl -sS http://localhost:8001/v1/reviews/health
+```
+
+### Прогон A1: Проверка синтетических данных из миграций
+
+```bash
+AUTH=http://localhost:8000
+RATE=http://localhost:8001
+
+curl -sS "$AUTH/v1/users/seed_alice"
+curl -sS "$AUTH/v1/users/seed_bob"
+curl -sS "$RATE/v1/topics/"
+curl -sS "$RATE/v1/reviews/"
+
+TOKEN=$(curl -si -X POST "$AUTH/v1/sessions/" \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"seed_alice","password":"pass123"}' \
+  | tr -d '\r' | awk -F': ' '/^x-auth-token:/{print $2}')
+
+curl -sS -H "Authorization: Bearer $TOKEN" "$AUTH/v1/sessions/"
 ```
 
 ### Прогон B: Полный сценарий (CRUD + авторизация + отзывы)
