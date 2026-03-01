@@ -35,6 +35,7 @@ class UserRepository:
             username=user_data.username,
             fullname=user_data.fullname,
             hashed_password=hashed_password,
+            department_id=user_data.department_id
         )
         self.db.add(db_user)
         await self.db.commit()

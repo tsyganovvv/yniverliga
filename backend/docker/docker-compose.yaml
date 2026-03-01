@@ -28,12 +28,6 @@ services:
         condition: service_healthy
     volumes:
       - ../services/auth_service/app:/app/app
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/v1/api/health', timeout=2).status == 200 else 1)"]
-      interval: 10s
-      timeout: 3s
-      retries: 15
-      start_period: 15s
     restart: unless-stopped
     networks:
       - app-network
