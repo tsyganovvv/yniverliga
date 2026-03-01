@@ -42,6 +42,8 @@ class SessionService:
         return {
             "id": user.id,
             "username": user.username,
+            "role": user.role,
+            "department_id": user.department_id,
             "is_active": user.is_active,
             "created_at": user.created_at,
             "fullname": user.fullname,

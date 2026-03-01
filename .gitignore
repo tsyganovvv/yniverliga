@@ -3,6 +3,13 @@
 # Python cache
 __pycache__/
 
+# Go
+bin/
+*.test
+*.out
+.coverprofile
+.cache/
+
 #launch.json folder
 .vscode/
 #Cache folder

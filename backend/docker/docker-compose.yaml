@@ -50,6 +50,26 @@ services:
     networks:
       - app-network
 
+  survey_service:
+    build:
+      context: ../
+      dockerfile: docker/survey_service.Dockerfile
+    container_name: survey_service
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=postgresql://postgres:main0000@postgres:5432/postgres
+      - AUTH_SERVICE_URL=http://auth_service:8000
+      - PORT=8002
+    depends_on:
+      auth_service:
+        condition: service_started
+      postgres:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - app-network
+
 volumes:
   postgres_data:
   redis_data:
