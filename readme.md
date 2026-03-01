@@ -64,6 +64,8 @@ curl -sS http://localhost:8001/v1/reviews/health
 | GET | `/v1/reviews/category/{category}` | Отзывы по категории |
 | GET | `/v1/reviews/positive/{is_positive}` | Отзывы по полярности |
 | GET | `/v1/reviews/rate/{rate}` | Отзывы по оценке `rate` |
+| GET | `/v1/reviews/report/csv` | Выгрузка отчета по отзывам в CSV |
+| GET | `/v1/reviews/report/excel` | Выгрузка отчета по отзывам в Excel (`.xlsx`) |
 
 ## 3. Форматы запросов
 
@@ -217,6 +219,10 @@ curl -sS "$RATE/v1/reviews/to/$BOB_ID"
 curl -sS "$RATE/v1/reviews/category/ясность"
 curl -sS "$RATE/v1/reviews/positive/true"
 curl -sS "$RATE/v1/reviews/rate/4"
+
+# 10) Экспорт отчетов
+curl -sS "$RATE/v1/reviews/report/csv" -o rewiews_report.csv
+curl -sS "$RATE/v1/reviews/report/excel" -o rewiews_report.xlsx
 ```
 
 ## 5. Примечания по текущему поведению API
