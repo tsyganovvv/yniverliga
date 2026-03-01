@@ -22,7 +22,8 @@ class TopicRepository:
         topic = Topic(
             name=topic_data.name,
             categories=topic_data.categories,
-            is_positive=topic_data.is_positive
+            is_positive=topic_data.is_positive,
+            is_active=topic_data.is_active,
         )
         
         self.db.add(topic)

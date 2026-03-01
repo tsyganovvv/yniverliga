@@ -21,7 +21,7 @@ async def login(
     service: Annotated[SessionService, Depends(get_session_service)],
 ):
     try:
-        token = await service.login(user_data.email, user_data.password)
+        token = await service.login(user_data.username, user_data.password)
         response = JSONResponse(
             content={"message": "Login successful"},
             status_code=status.HTTP_200_OK,
@@ -42,6 +42,8 @@ async def get_user(
 ):
     try:
         token = authorization.strip()
+        if token.lower().startswith("bearer "):
+            token = token[7:].strip()
         if not token:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

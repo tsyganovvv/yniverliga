@@ -1,18 +1,12 @@
-from passlib.context import CryptContext
-from uuid import UUID
+from datetime import datetime, timedelta, timezone
+import hashlib
 import secrets
-from datetime import datetime, timedelta
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.models.session_models import SessionModel
-
-
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-)
 
 
 class SessionRepository:
@@ -21,11 +15,7 @@ class SessionRepository:
     
     @staticmethod
     def get_hash(token: str) -> str:
-        return pwd_context.hash(token)
-    
-    @staticmethod
-    def verify(plain_password: str, hashed_password: str) -> bool:
-        return pwd_context.verify(plain_password, hashed_password)
+        return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
     async def create_session(
         self, user_id: UUID, expires_days: int = 3,
