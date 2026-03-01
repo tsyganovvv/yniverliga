@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import ClimateMonitoringGraph from '../components/ClimateMonitoringGraph';
 import ReviewsTable from '../components/ReviewsTable';
 import AnalyticsPage from '../components/AnalyticsPage';
+import EmployeesReviewsPage from '../components/EmployeesReviewsPage';
+import ReportsPage from '../components/ReportsPage';
 
 const navItems = [
   { name: 'Сотрудники', id: 'employees' },
@@ -22,58 +24,85 @@ const stats = [
 ];
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState('reviews');
+  const [activeTab, setActiveTab] = useState('employees');
+  const [selectedPeriod, setSelectedPeriod] = useState('Последний месяц');
+  const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
   const navigate = useNavigate();
+  const userRole = localStorage.getItem('userRole');
+  const isManager = userRole === 'manager';
+
+  const periods = ['Последний месяц', 'Последние 3 месяца', 'Последние 6 месяцев', 'Последний год', 'Все время'];
+
+  useEffect(() => {
+    if (!isManager) {
+      navigate('/team');
+    }
+  }, [isManager, navigate]);
 
   const handleTabClick = (tabId: string) => {
-    if (tabId === 'employees') {
-      navigate('/team');
-    } else {
-      setActiveTab(tabId);
-    }
+    setActiveTab(tabId);
   };
 
   return (
     <div className="min-h-screen pb-20 bg-white font-wix">
-      {/* Header */}
       <header className="flex items-center justify-between px-8 py-6 bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div className="flex-1 flex items-center">
-          <div className="w-10 h-10 flex items-center justify-center">
-             <BarChartIcon />
-          </div>
-        </div>
+        <div className="flex-1"></div>
         <nav className="flex items-center space-x-12">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => handleTabClick(item.id)}
-              className={`text-sm font-semibold transition-colors relative ${
+              className={`text-[16px] font-bold leading-5 transition-colors relative ${
                 activeTab === item.id 
                   ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#FFCC00] via-[#FF8800] to-[#FF0000]' 
-                  : 'text-gray-500 hover:text-gray-900'
+                  : 'text-black hover:text-gray-700'
               }`}
             >
               {item.name}
             </button>
           ))}
         </nav>
-        <div className="flex-1 flex justify-end">
-          <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border border-gray-100">
-            <img 
-              src="https://picsum.photos/seed/user123/100/100" 
-              alt="User" 
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-            />
-          </div>
-        </div>
+        <div className="flex-1"></div>
       </header>
 
-      {activeTab === 'analytics' ? (
-        <AnalyticsPage />
+      {activeTab === 'employees' ? (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="employees"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <EmployeesReviewsPage />
+          </motion.div>
+        </AnimatePresence>
+      ) : activeTab === 'analytics' ? (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="analytics"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <AnalyticsPage />
+          </motion.div>
+        </AnimatePresence>
+      ) : activeTab === 'reports' ? (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="reports"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ReportsPage />
+          </motion.div>
+        </AnimatePresence>
       ) : (
         <main className="max-w-[1440px] mx-auto px-[56px] mt-16">
-          {/* Title Section */}
           <div className="flex flex-col items-center justify-center gap-[15px] mb-[70px]">
             <h1 className="text-[48px] font-bold leading-[60px] text-black text-center">
               Общая статистика
@@ -83,7 +112,6 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Stats Grid */}
           <div className="flex flex-wrap justify-center gap-[20px] mb-[70px]">
             {stats.map((stat, index) => (
               <motion.div
@@ -99,7 +127,6 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Review Summary Header */}
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold">Сводка по отзывам</h2>
             <div className="flex space-x-4">
@@ -107,22 +134,42 @@ export default function DashboardPage() {
                 <span>Все команды</span>
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
-                <span>Последний месяц</span>
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              </button>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowPeriodDropdown(!showPeriodDropdown)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                >
+                  <span>{selectedPeriod}</span>
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                </button>
+                {showPeriodDropdown && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-10">
+                    {periods.map((period) => (
+                      <button
+                        key={period}
+                        onClick={() => {
+                          setSelectedPeriod(period);
+                          setShowPeriodDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors first:rounded-t-xl last:rounded-b-xl ${
+                          selectedPeriod === period ? 'bg-gray-100 font-semibold' : ''
+                        }`}
+                      >
+                        {period}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Content Section */}
           <div className="space-y-12">
-            {/* Detailed Graph Section */}
             <div className="mt-12">
               <h2 className="text-2xl font-bold mb-6">Детальный граф взаимодействий</h2>
               <ClimateMonitoringGraph />
             </div>
 
-            {/* Interactive Table Section */}
             <div className="mt-12">
               <h2 className="text-2xl font-bold mb-6">Детальный список отзывов</h2>
               <ReviewsTable />

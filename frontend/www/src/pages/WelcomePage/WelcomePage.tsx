@@ -89,6 +89,11 @@ const WelcomePage: React.FC = () => {
 export default WelcomePage;
 
 const EmployeeAuthForm: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
+    const handleLogin = () => {
+        localStorage.setItem('userRole', 'employee');
+        onLogin();
+    };
+
     return (
         <div className={styles.formWrapper}>
             <h1 className={styles.title}>Сотрудник</h1>
@@ -96,7 +101,7 @@ const EmployeeAuthForm: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
             <div className={styles.form}>
                 <input className={styles.input} placeholder="Логин сотрудника" />
                 <input className={styles.input} placeholder="Пароль" type="password" />
-                <button className={styles.gradientBtn} onClick={onLogin}>
+                <button className={styles.gradientBtn} onClick={handleLogin}>
                     Войти
                 </button>
             </div>
@@ -105,6 +110,13 @@ const EmployeeAuthForm: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
 };
 
 const ManagerAuthForm: React.FC = () => {
+    const navigate = useNavigate();
+
+    const handleLogin = () => {
+        localStorage.setItem('userRole', 'manager');
+        navigate('/dashboard');
+    };
+
     return (
         <div className={styles.formWrapper}>
             <h1 className={styles.title}>Руководитель</h1>
@@ -112,7 +124,7 @@ const ManagerAuthForm: React.FC = () => {
             <div className={styles.form}>
                 <input className={styles.input} placeholder="Логин сотрудника" />
                 <input className={styles.input} placeholder="Пароль" type="password" />
-                <button className={styles.gradientBtn}>Войти</button>
+                <button className={styles.gradientBtn} onClick={handleLogin}>Войти</button>
             </div>
         </div>
     );

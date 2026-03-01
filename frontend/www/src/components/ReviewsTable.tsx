@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useLayoutEffect, RefObject } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, ArrowUpDown, Tag, X, ChevronDown, Check, Filter, SortAsc, SortDesc } from 'lucide-react';
@@ -26,7 +27,6 @@ const reviewsData: Review[] = [
 type SortKey = 'date' | 'score' | 'author' | 'recipient' | 'category';
 type SortOrder = 'asc' | 'desc';
 
-// Helper to highlight text
 const HighlightedText = ({ 
   text, 
   highlight
@@ -183,7 +183,6 @@ const FilterDropdown = ({
               }}
               className="w-64 bg-white border border-gray-100 rounded-2xl shadow-2xl z-[9999] overflow-hidden"
             >
-              {/* Sorting Section */}
               <div className="p-2 border-b border-gray-50">
                 <button 
                   onClick={() => { onSortChange(columnKey as SortKey, 'asc'); setIsOpen(false); }}
@@ -205,7 +204,6 @@ const FilterDropdown = ({
                 </button>
               </div>
 
-              {/* Filter Section */}
               <div className="p-3">
                 <div className="relative mb-3">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
@@ -270,7 +268,6 @@ export default function ReviewsTable() {
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   
-  // Per-column filters
   const [columnFilters, setColumnFilters] = useState<Record<string, (string | number)[]>>({
     author: [],
     recipient: [],
